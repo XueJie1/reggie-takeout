@@ -7,6 +7,7 @@ import com.itheima.reggie.dto.DishDto;
 import com.itheima.reggie.entity.Category;
 import com.itheima.reggie.entity.Dish;
 import com.itheima.reggie.mapper.CategoryMapper;
+import com.itheima.reggie.mapper.DishMapper;
 import com.itheima.reggie.service.CategoryService;
 import com.itheima.reggie.service.DishFlavorService;
 import com.itheima.reggie.service.DishService;
@@ -31,6 +32,8 @@ public class DishController {
     private CategoryService categoryService;
     @Autowired
     private CategoryMapper categoryMapper;
+    @Autowired
+    private DishMapper dishMapper;
 
     /**
      * 新增菜品
@@ -82,5 +85,76 @@ public class DishController {
         }).collect(Collectors.toList());
         pageDto.setRecords(list);
         return R.success(pageDto);
+    }
+
+    /**
+     * 更改菜品信息时，根据id查询菜品信息。
+     * @param id
+     * @return
+     */
+    @GetMapping("/{id}")
+    public R<DishDto> get(@PathVariable Long id) {
+        DishDto dishDto = dishService.getByIdWithFlavor(id);
+        return R.success(dishDto);
+    }
+
+    /**
+     * 更改菜品和口味信息
+     * @param dishDto
+     * @return
+     */
+    @PutMapping
+    public R<String> update(@RequestBody DishDto dishDto) {
+        log.info("菜品：{}", dishDto.toString());
+        dishService.updateWithFlavor(dishDto);
+        return R.success("更改菜品成功");
+    }
+
+    /**
+     * 删除菜品，待改进
+     * @param ids
+     * @return
+     */
+    @DeleteMapping
+    public R<String> delete(@RequestParam List<Long> ids) {
+        try {
+            if(ids == null || ids.isEmpty()) {
+                log.info("id为空");
+                return R.error("id为空");
+            } else {
+                dishService.deleteBatch(ids);
+                return R.success("菜品删除成功");
+            }
+        } catch (Exception e) {
+            log.info("菜品删除失败");
+            throw new RuntimeException(e);
+        }
+    }
+
+    @PostMapping("/status/{statusId}")
+    public R<String> changeStatus(@PathVariable int statusId, @RequestParam List<Long> ids) {
+//        log.info("后端接收到了: {}, {}", statusId, ids.toString());
+        try {
+            if(ids == null || ids.isEmpty()) {
+                log.error("id为空");
+                return R.error("id为空");
+            } else {
+                 // 检查前端传来的状态id
+                 if (statusId != 1 && statusId != 0) {
+                    log.error("前端传入的statusID不正确（为除了0和1外的其他值）");
+                    return R.error("参数错误");
+                 }
+                 // 都没问题
+                dishService.changeStatus(statusId, ids);
+                 if (statusId == 1) {
+                     return R.success("菜品启售操作成功");
+                 } else {
+                     return R.success("菜品停售操作成功");
+                 }
+            }
+        } catch (Exception e) {
+            log.error("菜品状态更改失败");
+            throw new RuntimeException(e);
+        }
     }
 }
