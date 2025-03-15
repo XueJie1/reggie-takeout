@@ -157,4 +157,15 @@ public class DishController {
             throw new RuntimeException(e);
         }
     }
+
+    @GetMapping("/list")
+    public R<List<Dish>> list(Dish dish) {  // 参数是 Dish 而不是 Long categoryId, 通用性强
+        LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(dish.getCategoryId() != null ,Dish::getCategoryId, dish.getCategoryId());
+        queryWrapper.eq(Dish::getStatus, 1);    // 查询状态为1（起售）的菜品
+        // 排序
+        queryWrapper.orderByAsc(Dish::getSort).orderByDesc(Dish::getUpdateTime);
+        List<Dish> list = dishService.list(queryWrapper);
+        return R.success(list);
+    }
 }

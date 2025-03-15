@@ -7,8 +7,8 @@ spring:
     druid:
       driver-class-name: com.mysql.cj.jdbc.Driver
       url: jdbc:mysql://localhost:3306/reggie?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
-      username: root
-      password: "000001"
+      username: cao
+      password: "000001"  # 记得改成你自己的密码
   servlet:
     multipart:
       max-file-size: 50MB
