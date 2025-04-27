@@ -23,6 +23,13 @@ public class LoginCheckFilter implements Filter {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
 
+        // 添加 CORS 相关的响应头，确保 Session Cookie 能够被发送
+        response.setHeader("Access-Control-Allow-Origin", request.getHeader("Origin"));
+        response.setHeader("Access-Control-Allow-Credentials", "true");
+        response.setHeader("Access-Control-Allow-Headers", "Content-Type,Content-Length, Authorization, Accept,X-Requested-With,X-App-Id, X-Token");
+        response.setHeader("Access-Control-Allow-Methods", "PUT,POST,GET,DELETE,OPTIONS");
+        response.setHeader("Access-Control-Max-Age", "3600");
+
         // 1. 获取本次请求的URI
         String requestURI = request.getRequestURI();
         String[] urls = new String[]{   // 放行路径
@@ -44,17 +51,28 @@ public class LoginCheckFilter implements Filter {
             return;
         }
 
-        // 4. 需要处理，判断登录状态，如果已登录，则放行
-        Object empIdObj = request.getSession().getAttribute("employee");
-        if (request.getSession().getAttribute("employee") != null && empIdObj instanceof Long) {
-            Long empId = (Long) empIdObj;
-            if (empId > 0) {    // 检查empId是否大于0
-                log.info("用户已登录，id为{}", empId);
-                BaseContext.setUserId(empId);
-                filterChain.doFilter(request, response);
-                return;
-            }
+        //4-1、判断登录状态，如果已登录，则直接放行
+        if(request.getSession().getAttribute("employee") != null){
+            log.info("用户已登录，用户id为：{}",request.getSession().getAttribute("employee"));
+
+            Long empId = (Long) request.getSession().getAttribute("employee");
+            BaseContext.setCurrentId(empId);
+
+            filterChain.doFilter(request,response);
+            return;
         }
+        
+        //4-2、判断登录状态，如果已登录，则直接放行
+        if(request.getSession().getAttribute("user") != null){
+            log.info("用户已登录，用户id为：{}",request.getSession().getAttribute("user"));
+
+            Long userId = (Long) request.getSession().getAttribute("user");
+            BaseContext.setCurrentId(userId);
+
+            filterChain.doFilter(request,response);
+            return;
+        }
+
         // 5. 未登录则返回未登录结果，通过输出流方式向客户端页面响应数据
         response.setCharacterEncoding("UTF-8");
         response.setContentType("application/json");

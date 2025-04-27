@@ -1,0 +1,2 @@
+ALTER TABLE user 
+CHANGE COLUMN phone email VARCHAR(50) COMMENT '电子邮件';

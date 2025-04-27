@@ -22,13 +22,13 @@
         <div id="login" v-loading="loading">
             <div class="divHead">登录</div>
             <div class="divContainer">
-                <el-input placeholder=" 请输入手机号码" v-model="form.phone"  maxlength='20'/></el-input>
+                <el-input placeholder=" 请输入邮箱地址" v-model="form.email"  maxlength='50'/></el-input> <!-- 修改 placeholder 和 v-model -->
                 <div class="divSplit"></div>
-                <el-input placeholder=" 请输入验证码" v-model="form.code"  maxlength='20'/></el-input>
+                <el-input placeholder=" 请输入验证码" v-model="form.code"  maxlength='6'/></el-input> <!-- 修改 maxlength -->
                 <span @click='getCode'>获取验证码</span>
             </div>
-            <div class="divMsg" v-if="msgFlag">手机号输入不正确，请重新输入</div>
-            <el-button type="primary" :class="{btnSubmit:1===1,btnNoPhone:!form.phone,btnPhone:form.phone}" @click="btnLogin">登录</el-button>
+            <div class="divMsg" v-if="msgFlag">邮箱地址格式不正确，请重新输入</div> <!-- 修改提示信息 -->
+            <el-button type="primary" :class="{btnSubmit:1===1,btnNoPhone:!form.email,btnPhone:form.email}" @click="btnLogin">登录</el-button> <!-- 修改判断条件 -->
         </div>
         <!-- 开发环境版本，包含了有帮助的命令行警告 -->
         <script src="../../backend/plugins/vue/vue.js"></script>
@@ -47,43 +47,92 @@
             data(){
                 return {
                     form:{
-                        phone:'',
+                        email:'', // 修改 phone 为 email
                         code:''
                     },
                     msgFlag:false,
-                    loading:false
+                    loading:false,
+                    sending: false, // 添加发送状态，防止重复点击
+                    count: 0, // 倒计时秒数
+                    timer: null // 定时器
                 }
             },
             computed:{},
             created(){},
             mounted(){},
             methods:{
-                getCode(){
-                    this.form.code = ''
-                    const regex = /^(13[0-9]{9})|(15[0-9]{9})|(17[0-9]{9})|(18[0-9]{9})|(19[0-9]{9})$/;
-                    if (regex.test(this.form.phone)) {
-                        this.msgFlag = false
-                        this.form.code = (Math.random()*1000000).toFixed(0)
-                    }else{
-                        this.msgFlag = true
+                // 邮箱格式校验
+                isValidEmail(email) {
+                    const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                    return regex.test(email);
+                },
+                async getCode(){
+                    if (this.sending) return; // 如果正在发送，则不执行
+
+                    this.form.code = ''; // 清空验证码
+                    if (this.isValidEmail(this.form.email)) {
+                        this.msgFlag = false;
+                        this.sending = true; // 设置为发送中
+
+                        try {
+                            const res = await sendMsgApi({ email: this.form.email });
+                            if (res.code === 1) {
+                                this.$notify({ type: 'success', message: '验证码已发送，请注意查收' });
+                                // 开始倒计时
+                                this.count = 60; // 设置倒计时60秒
+                                this.timer = setInterval(() => {
+                                    if (this.count > 0) {
+                                        this.count--;
+                                    } else {
+                                        this.sending = false;
+                                        clearInterval(this.timer);
+                                        this.timer = null;
+                                    }
+                                }, 1000);
+                            } else {
+                                this.$notify({ type: 'warning', message: res.msg || '验证码发送失败' });
+                                this.sending = false; // 发送失败，重置状态
+                            }
+                        } catch (err) {
+                            this.$notify({ type: 'error', message: '请求发送失败，请检查网络' });
+                            this.sending = false; // 请求异常，重置状态
+                        }
+
+                    } else {
+                        this.msgFlag = true;
                     }
                 },
                 async btnLogin(){
-                    if(this.form.phone && this.form.code){
-                        this.loading = true
-                        const res = await loginApi({phone:this.form.phone})
-                        this.loading = false
-                        if(res.code === 1){
-                            sessionStorage.setItem("userPhone",this.form.phone)
-                            window.requestAnimationFrame(()=>{
-                                window.location.href= '/front/index.html'
-                            })                           
-                        }else{
-                            this.$notify({ type:'warning', message:res.msg});
+                    if(this.form.email && this.form.code){
+                        if (!this.isValidEmail(this.form.email)) {
+                            this.msgFlag = true;
+                            this.$notify({ type:'warning', message:'请输入有效的邮箱地址'});
+                            return;
                         }
-                    }else{
-                        this.$notify({ type:'warning', message:'请输入手机号码'});
+                        this.msgFlag = false;
+                        this.loading = true;
+                        // 调用新的登录接口，传入 email 和 code
+                        const res = await loginApi({ email: this.form.email, code: this.form.code });
+                        this.loading = false;
+                        if(res.code === 1){
+                            // 登录成功，存储用户信息到 sessionStorage 或 localStorage
+                            // 注意：后端返回的 res.data 应该是 User 对象
+                            sessionStorage.setItem("userInfo", JSON.stringify(res.data)); // 存储整个用户信息对象
+                            window.requestAnimationFrame(()=>{
+                                window.location.href= '/front/index.html';
+                            });
+                        } else {
+                            this.$notify({ type:'warning', message: res.msg || '登录失败' });
+                        }
+                    } else {
+                        this.$notify({ type:'warning', message:'请输入邮箱和验证码'});
                     }
+                }
+            },
+            beforeDestroy() {
+                // 组件销毁前清除定时器
+                if (this.timer) {
+                    clearInterval(this.timer);
                 }
             }
         })

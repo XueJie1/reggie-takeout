@@ -1,3 +1,13 @@
+// 发送邮箱验证码
+function sendMsgApi(data) {
+    return $axios({
+        'url': '/user/sendMsg',
+        'method': 'post',
+        data
+    })
+}
+
+// 登录接口，发送 email 和 code
 function loginApi(data) {
     return $axios({
       'url': '/user/login',
@@ -12,5 +22,3 @@ function loginoutApi() {
     'method': 'post',
   })
 }
-
-  
