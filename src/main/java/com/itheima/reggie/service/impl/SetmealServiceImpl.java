@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.itheima.reggie.common.CustomException;
 import com.itheima.reggie.dto.SetmealDto;
 import com.itheima.reggie.entity.Category;
 import com.itheima.reggie.entity.Setmeal;
@@ -18,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -138,5 +140,43 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
         }).collect(Collectors.toList());
         setmealDishService.saveBatch(setmealDishesUpdated);
 
+    }
+
+    @Override
+    public void removeWithDish(List<Long> ids) {
+        // 判断 ids是否为空，如果为空，抛出错误提示用户选择内容。
+        if (ids.isEmpty() || ids == null) {
+            throw new CustomException("请选择要删除的套餐");
+        }
+        // 查询 ids 对应的套餐是否已停售。
+        // select count(*) from setmeal where id in #{ids} and status is 1
+        LambdaQueryWrapper<Setmeal> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(Setmeal::getId, ids);
+        queryWrapper.eq(Setmeal::getStatus, 1);
+        int count = this.count(queryWrapper);   // 得到有多少在售的且在 ids 中的套餐
+        if (count > 0) {    // 有结果，抛出异常
+            throw new CustomException("套餐在售，请停售后再删除");
+        } else {    // 没结果，继续删除
+            LambdaQueryWrapper<SetmealDish> setmealDishQueryWrapper = new LambdaQueryWrapper<>();
+            setmealDishQueryWrapper.in(SetmealDish::getSetmealId, ids);
+            setmealDishService.remove(setmealDishQueryWrapper);
+        }
+    }
+
+    /**
+     * 更改套餐状态（启售、停售）
+     * @param ids
+     */
+    @Override
+    public void changeStatus(List<Long> ids, Long statusId) {
+        if (statusId != 1 && statusId != 0) {
+            throw new CustomException("状态id的值是非法的");
+        } else {
+//            LambdaQueryWrapper<Setmeal> queryWrapper = new LambdaQueryWrapper<>();
+//            queryWrapper.in(Setmeal::getId, ids).;
+            UpdateWrapper<Setmeal> updateWrapper = new UpdateWrapper<>();
+            updateWrapper.in("id", ids).set("status", statusId);
+            this.update(updateWrapper);
+        }
     }
 }

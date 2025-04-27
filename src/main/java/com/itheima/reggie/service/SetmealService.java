@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.itheima.reggie.dto.SetmealDto;
 import com.itheima.reggie.entity.Setmeal;
 
+import java.util.List;
+
 public interface SetmealService extends IService<Setmeal> {
     /**
      * 新增套餐，同时需要保存套餐和菜品的关联关系
@@ -14,4 +16,6 @@ public interface SetmealService extends IService<Setmeal> {
     public Page<SetmealDto> page(int page, int pageSize, String name);
     public SetmealDto getByIdWithDish(Long id);
     public void updateWithDish(SetmealDto setmealDto);
+    public void removeWithDish(List<Long> ids);
+    public void changeStatus(List<Long> ids, Long statusId);
 }

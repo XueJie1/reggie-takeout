@@ -101,4 +101,31 @@ public class SetmealController {
         setmealService.updateWithDish(setmealDto);
         return R.success("数据修改成功");
     }
+
+    /**
+     * 删除套餐，未停售的套餐不能删除。
+     * @param ids
+     * @return
+     */
+    @DeleteMapping
+    public R<String> remove(@RequestParam List<Long> ids){
+        setmealService.removeWithDish(ids);
+        return R.success("套餐删除成功");
+    }
+
+    /**
+     * 更改套餐状态（启售、停售）
+     * @param statusId 0：从启售变为停售，1：从停售变为启售
+     * @param ids
+     * @return
+     */
+    @PostMapping("/status/{statusId}")
+    public R<String> changeStatus(@PathVariable Long statusId, @RequestParam List<Long> ids) {
+        setmealService.changeStatus(ids, statusId);
+        if (statusId == 1) {
+            return R.success("（批量）启售成功");
+        } else {
+            return R.success("（批量）停售成功");
+        }
+    }
 }
