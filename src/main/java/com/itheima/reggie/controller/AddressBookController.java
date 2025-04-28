@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.reggie.common.BaseContext;
+import com.itheima.reggie.common.CustomException;
 import com.itheima.reggie.common.R;
 import com.itheima.reggie.entity.AddressBook;
 import com.itheima.reggie.service.AddressBookService;
@@ -101,5 +102,18 @@ public class AddressBookController {
 
         //SQL:select * from address_book where user_id = ? order by update_time desc
         return R.success(addressBookService.list(queryWrapper));
+    }
+
+    @PutMapping
+    @ResponseBody
+    public R<String> updateAddress(@RequestBody AddressBook addressBook) {
+        if (addressBook != null) {
+            log.info("获得了前端的："+addressBook.toString());
+            addressBookService.updateById(addressBook);
+        } else {
+            log.error("addressbook为空！");
+            return R.error("参数错误");
+        }
+        return R.success("更新成功");
     }
 }

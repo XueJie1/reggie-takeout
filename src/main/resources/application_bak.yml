@@ -1,0 +1,54 @@
+server:
+  port: 8080
+spring:
+  redis:
+    host: localhost
+    port: 6379
+    # password: your_redis_password # 如果你的 Redis 设置了密码，请在这里配置
+    # database: 0 # Redis 数据库索引，默认为 0
+    # timeout: 5000ms # 连接超时时间
+    # lettuce:
+    #   pool:
+    #     max-active: 8 # 连接池最大连接数
+    #     max-wait: -1ms # 连接池最大阻塞等待时间，-1 表示不限制
+    #     max-idle: 8 # 连接池最大空闲连接数
+    #     min-idle: 0 # 连接池最小空闲连接数
+  application:
+    name: reggie_take_out
+  datasource:
+    druid:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://localhost:3306/reggie?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
+      username: cao
+      password: "000001"  # 记得改成你自己的密码
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+    # session:
+    #   cookie:
+    #     name: REGGIESESSIONID # 设置 Session Cookie 的自定义名称
+    #     path: / # 设置 Session Cookie 的路径为根路径
+    #     secure: false # 显式设置 secure 标志为 false
+    #     http-only: true # 显式设置 http-only 标志为 true
+mybatis-plus:
+  configuration:
+    #在映射实体或者属性时，将数据库中表名和字段名中的下划线去掉，按照驼峰命名法映射
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: ASSIGN_ID
+  mail:
+    host: smtp.qq.com
+    port: 465 # 使用 SSL 端口
+    username: # 完整的邮箱地址
+    password: # 邮箱授权码
+    properties:
+      mail:
+        smtp:
+          ssl:
+            enable: true # 启用 SSL
+        from:  # 发件人邮箱地址
+#reggie:
+#  base-upload-path: uploads/

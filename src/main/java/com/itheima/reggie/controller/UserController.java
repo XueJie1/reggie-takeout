@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.itheima.reggie.common.R;
 import com.itheima.reggie.entity.User;
 import com.itheima.reggie.service.UserService;
+import com.itheima.reggie.common.BaseContext;
 import com.itheima.reggie.common.CustomException; // 引入 CustomException
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils; // 使用 commons-lang 校验
@@ -100,7 +101,6 @@ public class UserController {
             // 登录成功后，可以从 Redis 中删除验证码
             log.info("登录成功，从 Redis 移除验证码: key={}", redisKey);
             redisTemplate.delete(redisKey);
-
             return R.success(user);
         }
 
