@@ -13,6 +13,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 public class ReggieApplication {
     public static void main(String[] args) {
         SpringApplication.run(ReggieApplication.class,args);
-        log.info("Project Riggie Takeout launched successfully.\n瑞吉外卖启动成功。\n 您可以通过 http://localhost:8080/backend/page/login/login.html 登录后端。\n 通过：http://localhost:8080/front/page/login.html 登录前端");
+        log.info("Project Riggie Takeout launched successfully.\n瑞吉外卖启动成功。\n 您可以通过 http://localhost:8080/backend/page/login/login.html 登录管理后台。\n 通过：http://localhost:8080/front/page/login.html 登录客户端");
     }
 }

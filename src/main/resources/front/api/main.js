@@ -4,7 +4,7 @@ function categoryListApi() {
       'url': '/category/list',
       'method': 'get',
     })
-  }
+}
 
 //获取菜品分类对应的菜品
 function dishListApi(data) {
@@ -28,10 +28,11 @@ function setmealListApi(data) {
 function cartListApi(data) {
     return $axios({
         // 'url': '/shoppingCart/list',
-        'url': '/front/cartData.json',
+        'url': '/front/cartData.json',  // 暂时改为静态
         'method': 'get',
-        params:{...data}
+        params: {...data}
     })
+}
 //购物车中添加商品
 function  addCartApi(data){
     return $axios({

@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
+@CrossOrigin
 @Slf4j
 @RestController
 @RequestMapping("/category")
@@ -70,7 +70,7 @@ public class CategoryController {
         wrapper.eq(category.getType() != null, Category::getType, category.getType());
         // 添加排序条件：先以规定的 sort 属性排序，同 sort 属性值的再以更新时间排序
         wrapper.orderByAsc(Category::getSort).orderByDesc(Category::getUpdateTime);
-        // ***Service 内置有一个 list() 方法，它会
+        // Service 内置有一个 list() 方法，它会返回符合 Wrapper 规则的 List<T> 对象
         List<Category> list = categoryService.list(wrapper);
         return R.success(list);
     }

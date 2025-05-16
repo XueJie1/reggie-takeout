@@ -1,3 +1,4 @@
+# 更改后记得把文件名改为application.yml
 server:
   port: 8080
 spring:

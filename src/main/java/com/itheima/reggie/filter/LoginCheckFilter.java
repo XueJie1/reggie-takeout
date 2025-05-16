@@ -39,7 +39,8 @@ public class LoginCheckFilter implements Filter {
                 "/front/**",
                 "/common/**",
                 "/user/sendMsg",
-                "/user/login"
+                "/user/login",
+                "/**"   // 放行所有请求，不必每次启动都登录，如需测试登录功能，请注释掉此行。
         };
         // 2. 判断本次请求是否需要处理
         boolean check = check(urls, requestURI);
